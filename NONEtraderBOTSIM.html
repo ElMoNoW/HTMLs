@@ -1,0 +1,1938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Alcor WAX --- Gameplay Edition</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{
+    --bg: #091a2f;
+    --panel: #0e223b;
+    --muted: #a6c0d8;
+    --text-primary: #eaf1f8;
+    --accent-main: #00bcd4; /* Vibrant Cyan-Blue */
+    --accent-secondary: #0079b7; /* Darker Blue */
+    --accent-danger: #ef5350;
+    --accent-warn: #ffca28;
+    --btn-bg: rgba(255,255,255,0.06);
+    --btn-border: rgba(255,255,255,0.12);
+    --btn-hover-border: var(--accent-main);
+    --btn-active-bg: linear-gradient(90deg,var(--accent-main),var(--accent-secondary));
+    --btn-active-text: #001020;
+    /* NEW COLORS FOR NONE PACKS */
+    --none-open-1: #4caf50; /* Green */
+    --none-open-2: #2196f3; /* Blue */
+    --none-open-3: #ff5722; /* Orange */
+  }
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text-primary);line-height:1.5;}
+  .wrap{max-width:1400px;margin:18px auto;display:grid;grid-template-columns:380px 1fr;gap:16px;padding:12px;}
+  @media (max-width:1100px){.wrap{grid-template-columns:1fr;}}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);overflow:hidden;}
+  h1{margin:0 0 10px;font-size:18px;}
+  .small{font-size:13px;color:var(--muted);}
+  input,select{width:100%;padding:8px;border-radius:8px;border:1px solid #122435;background:transparent;color:var(--text-primary);box-sizing:border-box;font-size:14px;}
+  select:hover{background:rgba(255,255,255,0.05);border-color:var(--accent-main);}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .btn{padding:8px 10px;border-radius:10px;border:1px solid var(--btn-border);background:var(--btn-bg);color:var(--muted);cursor:pointer;transition:all 0.2s ease;white-space:nowrap;font-size:14px;font-weight:600;}
+  .btn:hover{border-color:var(--btn-hover-border);color:var(--accent-main);}
+  .btn.active{background:var(--btn-active-bg);border:none;color:var(--btn-active-text);}
+  .btn.primary{background:linear-gradient(45deg, var(--accent-main), var(--accent-secondary));border:none;color:#001020;}
+  .btn.primary:hover{opacity:0.8;}
+  .btn.danger{background:var(--accent-danger);color:white;border:none;}
+  .btn.danger:hover{opacity:0.8;}
+  .btn.warn{background:var(--accent-warn);color:black;border:none;}
+  .btn.warn:hover{opacity:0.8;}
+  .percent-btn{font-size:12px;padding:6px;}
+  .pool-list{max-height:40vh;overflow-y:auto;margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+  .pool{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);cursor:pointer;}
+  .pool:hover{background:rgba(255,255,255,0.05);}
+  .pool.active{border:1px solid rgba(0,188,212,0.12);}
+  .chart{height:360px;padding:8px;position:relative;}
+  @media (max-width:768px){.chart{height:250px;}}
+  .log{height:150px;overflow-y:auto;background:rgba(0,0,0,0.12);padding:8px;border-radius:8px;font-size:13px;}
+  .log .good{color:#a7f3d0;}.log .bad{color:#fca5a5;}
+  footer{font-size:12px;color:var(--muted);margin-top:10px;}
+  .pair-selector{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .pair-dot{width:16px;height:16px;border-radius:50%;background:#98a7bf;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
+  .pair-dot.active{background:var(--accent-main);border:2px solid rgba(0,188,212,0.5);box-shadow:0 0 8px var(--accent-main);}
+  .pair-dot:hover{background:var(--accent-secondary);}
+  code{background:rgba(255,255,255,0.02);padding:2px 6px;border-radius:6px;}
+  .accordion-header{cursor:pointer;padding:10px 4px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+  .accordion-header h1{margin-bottom:0;}
+  .accordion-header:hover h1{color:var(--accent-main);}
+  .accordion-indicator{font-size:24px;font-weight:300;transition:transform .3s ease-out;color:var(--muted);}
+  .accordion-header.active .accordion-indicator{transform:rotate(45deg);}
+  .accordion-content-wrapper{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s ease-out;}
+  .accordion-content-wrapper.active{grid-template-rows:1fr;}
+  .accordion-content{overflow:hidden;transition:opacity .4s ease-in-out;opacity:0;padding:0 5px;}
+  .accordion-content-wrapper.active .accordion-content{padding-top:15px;padding-bottom:15px;opacity:1;}
+  .avatars{display:grid;grid-template-columns:repeat(auto-fit, minmax(72px, 1fr));gap:8px;margin-top:8px;}
+  .avatar{width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#071833,#092233);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;border:2px solid transparent;transition:all .3s ease;}
+  .avatar:hover{border-color:var(--accent-main);}
+  .avatar.active{border-color:var(--accent-main);box-shadow:0 0 12px rgba(0,188,212,.7);}
+  .portfolio-controls{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
+  .status-icon{font-size:10px;margin-left:5px;}
+  .r-d-panel{margin-top:10px;}
+  progress{width:100%;height:10px;accent-color:var(--accent-main);}
+  .notification-banner{position:fixed;top:-100px;left:50%;transform:translateX(-50%);background:linear-gradient(45deg, var(--accent-main), var(--accent-secondary));color:#001020;padding:12px 20px;border-radius:8px;box-shadow:0 5px 20px rgba(0,0,0,0.4);transition:top 0.5s ease-in-out;z-index:1000;}
+  .notification-banner.show{top:20px;}
+  .news-ticker-wrap{overflow:hidden;height:24px;background:rgba(0,0,0,0.2);border-radius:8px;margin-bottom:12px;}
+  .news-ticker{white-space:nowrap;animation:ticker-scroll 25s linear infinite;}
+  .news-ticker-item{display:inline-block;padding:0 10px;font-size:13px;line-height:24px;}
+  .news-ticker-item.good{color:var(--accent-main);}.news-ticker-item.bad{color:var(--accent-danger);}
+  @keyframes ticker-scroll{from{transform:translateX(100%);}to{transform:translateX(-100%);}}
+  .nft-inventory{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .nft-item{background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;font-size:12px;min-width:150px;flex:1 1 150px;cursor:pointer;border:1px solid transparent;transition:all 0.2s ease;display:flex;flex-direction:column;justify-content:space-between;position:relative;}
+  .nft-item:hover{border-color:var(--accent-main);}
+  .nft-item.selected{border-color:var(--accent-secondary);box-shadow:0 0 8px rgba(0,188,212,0.7);}
+  .leaderboard-list{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+  .leaderboard-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);}
+  @media (max-width:600px){.row{flex-wrap:wrap;}.btn{flex:1 1 auto;}}
+  #chartCanvas{width: 100% !important; height: 100% !important;}
+  .fuse-button{background:var(--accent-secondary);color:var(--bg);font-weight:700;}
+  .disabled-fuse{opacity: 0.5; cursor: not-allowed;}
+  .player-rank{font-size: 10px; color: var(--muted); position: absolute; top: 4px; right: 6px; font-weight: bold;}
+  .buy-btn{background:var(--accent-main); color:var(--bg); font-weight:700;}
+  .sell-btn{background:var(--accent-danger); color:white; font-weight:700;}
+  .quest-item{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin-bottom:8px;}
+  .quest-progress{height:8px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;}
+  .quest-progress-bar{height:100%;background:linear-gradient(90deg, var(--accent-main), var(--accent-secondary));width:0;transition:width 0.5s ease;}
+  .quest-reward{color:var(--accent-main);font-weight:bold;}
+  .claim-quest-btn{background:var(--accent-main);color:var(--bg);border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+  /* MODIFIED: none-nft style for the pack itself */
+  .none-nft{border: 2px dashed #ffca28; background: linear-gradient(135deg, #242424, #000); color: #ffca28;}
+  .pack-nft{border: 2px solid #5d5dff; background: linear-gradient(135deg, #1a1a2e, #161623); color: #5d5dff;}
+  /* NEW: Style for the opened none nft */
+  .none-opened-nft { border: 2px solid var(--none-open-1); background: linear-gradient(135deg, #242424, #000); color: var(--none-open-1);}
+  /* NEW: Style for Scrap NFTs */
+  .scrap-nft { border: 2px solid #6b6b6b; background: linear-gradient(135deg, #2a2a2a, #111); color: #6b6b6b;}
+</style>
+</head>
+<body>
+<div id="notificationBanner" class="notification-banner"></div>
+<div class="wrap">
+<div class="card" id="tokenHubCard">
+    <h1><span id="tokenSymbolDisplay">NONE</span>/WAX Live Metrics</h1>
+    <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+        <div>
+            <div class="small">Last Price (WAX)</div>
+            <div id="livePrice" style="font-size: 24px; font-weight: 700; color: var(--accent-main);">--</div>
+        </div>
+        <div>
+            <div class="small">24h Change</div>
+            <div id="liveChange" style="font-size: 20px; font-weight: 600; color: var(--text-primary);">--</div>
+        </div>
+        <div>
+            <div class="small">24h Volume (WAX)</div>
+            <div id="liveVolume" style="font-size: 20px; font-weight: 600;">--</div>
+        </div>
+        <div>
+            <div class="small">LP Reserves (WAX)</div>
+            <div id="poolReserve" style="font-size: 20px; font-weight: 600;">--</div>
+        </div>
+        <div>
+            <div class="small">Total Supply (on-chain)</div>
+            <div id="totalSupply" style="font-size: 20px; font-weight: 600;">--</div>
+        </div>
+        <div>
+            <div class="small">Holders (Estimate)</div>
+            <div id="holdersCount" style="font-size: 20px; font-weight: 600;">N/A*</div>
+        </div>
+    </div>
+    <div style="margin-top: 15px;" class="row">
+        <button id="exportDataBtn" class="btn primary">Export Hub Data (JSON)</button>
+        <button id="metamaskBtn" class="btn">Add to MetaMask (Placeholder)</button>
+    </div>
+    <div class="small" style="margin-top: 10px; color: var(--accent-warn);">* Note: Holder count is an estimate/placeholder as this requires a separate blockchain node API call.</div>
+</div>
+
+
+  <div class="card">
+    <div class="news-ticker-wrap">
+      <div id="newsTicker" class="news-ticker"></div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header active"><h1>Players & Portfolio</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper active">
+        <div class="accordion-content">
+          <div class="avatars" id="avatars"></div>
+          <div class="portfolio-controls"><button id="lockViewBtn" class="btn active">Locked View</button><button id="liveViewBtn" class="btn">Live Events</button></div>
+          <div id="portfolio" style="background:rgba(255,255,255,0.01);padding:8px;border-radius:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header active"><h1>Milestones & Quests</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper active">
+        <div class="accordion-content">
+          <div id="milestonePanel">
+            <div class="small">Complete quests to earn rewards and progress through milestones.</div>
+            <div id="questsList" style="margin-top: 12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header active"><h1>R&D / Alpha System</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper active">
+        <div class="accordion-content">
+          <div class="small">Invest WAX to fund research. Complete research to unlock a powerful, random "Alpha Drop" that gives you a temporary market edge.</div>
+          <div class="r-d-panel">
+            <label class="small">Research Progress</label>
+            <progress id="rdProgress" value="0" max="1000"></progress>
+            <div style="margin-top:8px" class="row">
+              <input id="rdInvestAmount" type="number" value="100" style="max-width:100px;">
+              <button id="rdInvestBtn" class="btn primary" style="flex:1;">Invest WAX in R&D</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header active"><h1>Leaderboard</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper active">
+        <div class="accordion-content">
+          <div id="leaderboardList" class="leaderboard-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header active"><h1>Market & Pools</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper active">
+        <div class="accordion-content">
+          <input id="filterInput" placeholder="filter by name/symbol..." />
+          <div class="pool-list" id="poolList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header"><h1>Special Packs & Rewards</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper">
+        <div class="accordion-content">
+          <div style="font-weight:bold;">NONE Packs</div>
+          <div class="small">Use your NONE tokens to buy packs for a chance at high-value rewards, but be careful, they might burn!</div>
+          <div class="row" style="margin-top: 8px;">
+            <button id="buyNonep100Btn" class="btn" title="Cost: 100 NONE. Receive a basic NONE NFT.">Buy NONEp100</button>
+            <button id="buyNonep1000Btn" class="btn" title="Cost: 1000 NONE. Receive a premium NONE NFT.">Buy NONEp1000</button>
+            <button id="buyNonep10000Btn" class="btn" title="Cost: 10000 NONE. Receive an elite NONE NFT.">Buy NONEp10000</button>
+          </div>
+          <div style="font-weight:bold; margin-top: 16px;">NFT Packs</div>
+          <div class="small">Buy NFT packs to receive NFTs. You can open these pack NFTs from your inventory.</div>
+          <div class="row" style="margin-top: 8px;">
+            <button id="buyBasicPackBtn" class="btn" title="50 WAX - Common/Uncommon NFTs">Buy Basic Pack</button>
+            <button id="buyPremiumPackBtn" class="btn" title="200 WAX - Higher chance for Rare/Epic NFTs">Buy Premium Pack</button>
+            <button id="buyElitePackBtn" class="btn" title="500 WAX - Best chance for Epic/Legendary NFTs">Buy Elite Pack</button>
+          </div>
+          <div style="font-weight:bold; margin-top: 16px;">Leftovers Packs</div>
+          <div class="small">Use spare WAX to buy a pack. It's a gamble!</div>
+          <div class="row" style="margin-top: 8px;">
+            <button id="buyLeftoversPackBtn" class="btn" title="10 WAX - Chance for a Common/Uncommon NFT or a Scrap NFT">Buy Leftovers Pack</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header"><h1>Token Management</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper">
+        <div class="accordion-content">
+          <div class="small">Manually add tokens or load from Alcor.</div>
+          <div style="margin-top:12px"><label class="small">Symbol</label><input id="symbolInput" placeholder="e.g. BOCO" value="BOCO" /></div>
+          <div style="margin-top:8px"><label class="small">Contract</label><input id="contractInput" placeholder="e.g. bobocoin.gm" value="bobocoin.gm" /></div>
+          <div style="margin-top:10px" class="row"><button id="checkBtn" class="btn primary">Check token</button><button id="loadPoolBtn" class="btn">Load pools (contract)</button></div>
+          <div id="checkResult" style="margin-top:10px"></div>
+          <div style="margin-top:12px"><label class="small">Manual add price</label><input id="manualPrice" placeholder="price in WAX (e.g. 0.12)" /></div>
+          <div style="margin-top:8px" class="row"><button id="addManualBtn" class="btn primary">Add manually</button><button id="useFallbackBtn" class="btn">Use fallback tokens</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <div class="accordion-header"><h1>Settings & Info</h1><div class="accordion-indicator">+</div></div>
+      <div class="accordion-content-wrapper">
+        <div class="accordion-content">
+          <div style="margin-top:8px" class="row"><button id="resetBtn" class="btn danger">Reset Cache & Reload</button></div>
+          <footer>
+            <p>Thursday, August 14, 2025 at 7:56 PM - Bang Mueang Mai, Thailand</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h1>Chart & Trade</h1>
+    <div class="chart"><canvas id="chartCanvas"></canvas></div>
+    <div style="margin-top:8px">
+      <label class="small" id="tradeAmtLabel">Trade Amount (WAX)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="selectPool" style="flex:1;"></select>
+        <div class="pair-selector" id="pairSelector"></div>
+        <input id="tradeAmt" style="max-width:120px;" value="10" />
+        <div class="row" style="margin-left:auto; flex-wrap:nowrap;">
+          <button id="buyBtn" class="btn buy-btn">Buy</button>
+          <button id="sellBtn" class="btn sell-btn">Sell</button>
+          <button id="addLpBtn" class="btn">Add LP</button>
+          <button id="removeLpBtn" class="btn">Remove LP</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px" class="row" id="percentButtons">
+      <button class="btn percent-btn" onclick="setTradeAmt(1.0)">100%</button><button class="btn percent-btn" onclick="setTradeAmt(0.75)">75%</button><button class="btn percent-btn" onclick="setTradeAmt(0.5)">50%</button><button class="btn percent-btn" onclick="setTradeAmt(0.25)">25%</button>
+      <button class="btn percent-btn" onclick="setTradeAmt(0.1)">10%</button><button class="btn percent-btn" onclick="setTradeAmt(0.05)">5%</button><button class="btn percent-btn" onclick="setTradeAmt(0.02)">2%</button><button class="btn percent-btn" onclick="setTradeAmt(0.01)">1%</button><button class="btn percent-btn" onclick="setTradeAmt(0.00)">0%</button>
+    </div>
+    <div style="margin-top:8px" class="row"><button id="pauseBtn" class="btn">Pause Sim</button></div>
+    <div style="margin-top:12px"><h1 style="font-size:14px">Log</h1><div id="log" class="log"></div></div>
+  </div>
+</div>
+
+<script>
+// --- STATE ---
+let pools = [], players = [], nfts = [], chart = null, tick = 0, timer = null, selectedPoolIdx = 0, marketSentiment = 0;
+let manuallySelectedPlayerIdx = 0;
+let portfolioViewMode = 'locked';
+let rdProgress = 0, rdTotalCost = 1000;
+let activeAlphaDrop = null;
+let newsItems = [];
+let lastPoolFilter = '';
+let quests = [];
+
+// --- UI ELEMENTS ---
+const symbolInput = document.getElementById('symbolInput'), contractInput = document.getElementById('contractInput'), checkBtn = document.getElementById('checkBtn'), loadPoolBtn = document.getElementById('loadPoolBtn'), checkResult = document.getElementById('checkResult'), manualPrice = document.getElementById('manualPrice'), addManualBtn = document.getElementById('addManualBtn'), useFallbackBtn = document.getElementById('useFallbackBtn'), resetBtn = document.getElementById('resetBtn'), poolList = document.getElementById('poolList'), filterInput = document.getElementById('filterInput'), avatars = document.getElementById('avatars'), portfolio = document.getElementById('portfolio'), selectPool = document.getElementById('selectPool'), pairSelector = document.getElementById('pairSelector'), tradeAmt = document.getElementById('tradeAmt'), buyBtn = document.getElementById('buyBtn'), sellBtn = document.getElementById('sellBtn'), addLpBtn = document.getElementById('addLpBtn'), removeLpBtn = document.getElementById('removeLpBtn'), pauseBtn = document.getElementById('pauseBtn'), buyBasicPackBtn = document.getElementById('buyBasicPackBtn'), buyPremiumPackBtn = document.getElementById('buyPremiumPackBtn'), buyElitePackBtn = document.getElementById('buyElitePackBtn'), logEl = document.getElementById('log'), chartCanvas = document.getElementById('chartCanvas').getContext('2d');
+const lockViewBtn = document.getElementById('lockViewBtn'), liveViewBtn = document.getElementById('liveViewBtn');
+const rdProgressEl = document.getElementById('rdProgress'), rdInvestAmountEl = document.getElementById('rdInvestAmount'), rdInvestBtn = document.getElementById('rdInvestBtn');
+const notificationBanner = document.getElementById('notificationBanner');
+const newsTicker = document.getElementById('newsTicker');
+const leaderboardList = document.getElementById('leaderboardList');
+const questsList = document.getElementById('questsList');
+const lastActivity = {};
+const tradeAmtLabel = document.getElementById('tradeAmtLabel');
+
+// NONE pack UI elements
+const buyNonep100Btn = document.getElementById('buyNonep100Btn');
+const buyNonep1000Btn = document.getElementById('buyNonep1000Btn');
+const buyNonep10000Btn = document.getElementById('buyNonep10000Btn');
+// NEW: Leftovers pack UI element
+const buyLeftoversPackBtn = document.getElementById('buyLeftoversPackBtn');
+
+// --- CONFIG ---
+const ALCOR_TOKEN_ENDPOINT = 'https://wax.alcor.exchange/api/v2/tokens/';
+const ALCOR_MARKETS_ENDPOINT = 'https://wax.alcor.exchange/api/markets';
+const CACHE_KEY = 'sim_tokens_v4';
+const FALLBACK = [
+  {id:'bobocoin.gm:BOCO',symbol:'BOCO',contract:'bobocoin.gm',name:'BOCO/WAX',price:0.8,liquidity:100000,supply:1000000},
+  {id:'bobocoin.gm:BOPIXBO',symbol:'BOPIXBO',contract:'bobocoin.gm',name:'BOPIXBO/WAX',price:0.9,liquidity:100000,supply:1000000},
+  {id:'bobocoin.gm:OXO',symbol:'OXO',contract:'bobocoin.gm',name:'OXO/WAX',price:1.02,liquidity:100000,supply:1000000},
+  {id:'bobocoin.gm:NONE',symbol:'NONE',contract:'bobocoin.gm',name:'NONE/WAX',price:0.202,liquidity:100000,supply:1000000},
+  {id:'bmpm.gm:ALL',symbol:'ALL',contract:'bmpm.gm',name:'ALL/WAX',price:1.1,liquidity:100000,supply:1000000}
+];
+
+// --- HELPERS ---
+function log(msg, type='info', playerIdx = null) {
+  logEl.innerHTML = `<div class="${type}" style="margin-bottom:6px"><small style="color:#9fb6d6">${new Date().toLocaleTimeString()}</small> — ${msg}</div>` + logEl.innerHTML;
+  addNewsItem(msg, type);
+  if(playerIdx !== null) lastActivity[playerIdx] = tick;
+}
+function saveCache() {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(pools));
+}
+function loadCache() {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null') || null; } catch(e) { return null; }
+}
+function showNotification(message) {
+  notificationBanner.textContent = message;
+  notificationBanner.classList.add('show');
+  setTimeout(() => { notificationBanner.classList.remove('show'); }, 5000);
+}
+function addNewsItem(message, type='info') {
+  newsItems.push({ message, type });
+  renderNewsTicker();
+}
+function renderNewsTicker() {
+  newsTicker.innerHTML = '';
+  // Show last 10 news items
+  newsItems.slice(-10).forEach(item => {
+    const span = document.createElement('span');
+    span.className = `news-ticker-item ${item.type}`;
+    span.textContent = item.message;
+    newsTicker.appendChild(span);
+  });
+}
+function makePoolFromTokenInfo(info) {
+  const symbol = info.symbol || (info.id && info.id.split('-')[0]) || 'TKN';
+  const contract = info.contract || info.account || (info.id && info.id.split('-')[1]) || contractInput.value || 'unknown';
+  const price = parseFloat((info.price || info.price_usd || info.last_price || info.last) || 0) || (Math.random()*0.5 + 0.01);
+  const liquidity = parseFloat(info.liquidity || info.pool_liquidity || info.liq) || (Math.random()*1200 + 200);
+  const supply = parseFloat(info.supply || info.total_supply) || (Math.random()*40000 + 5000);
+  const id = `${contract}:${symbol}`;
+  const reserveWax = liquidity / 2;
+  const reserveToken = price > 0 ? reserveWax / price : 10000;
+  const totalLpSupply = Math.sqrt(reserveWax * reserveToken);
+  const emissionRate = Math.random() * 0.01 + 0.001;
+  return { id, symbol, contract, name: `${symbol}/WAX`, price, reserveWax, reserveToken, supply, totalLpSupply, stakedLpTotal: 0, emissionRate, history: [], marketSentiment: 0 };
+}
+function calculateNetWorth(player) {
+  let totalHold = 0;
+  for(const sym in player.holdings) {
+    const amt = player.holdings[sym];
+    const pool = pools.find(pp => pp.symbol === sym);
+    if(pool) totalHold += amt * pool.price;
+  }
+  let totalLpValue = 0;
+  for(const sym in player.lpHoldings) {
+    const amt = player.lpHoldings[sym];
+    const pool = pools.find(pp => pp.symbol === sym);
+    if(pool && pool.totalLpSupply > 0) {
+      const share = amt / pool.totalLpSupply;
+      totalLpValue += share * (pool.reserveWax + pool.reserveToken * pool.price);
+    }
+  }
+  for(const sym in player.stakedLp) {
+    const amt = player.stakedLp[sym];
+    const pool = pools.find(pp => pp.symbol === sym);
+    if(pool && pool.totalLpSupply > 0) {
+      const share = amt / pool.totalLpSupply;
+      totalLpValue += share * (pool.reserveWax + pool.reserveToken * pool.price);
+    }
+  }
+  let totalPendingToken = 0;
+  for(const sym in player.pendingTokenRewards) {
+    const amt = player.pendingTokenRewards[sym] || 0;
+    const pool = pools.find(pp => pp.symbol === sym);
+    if(pool) totalPendingToken += amt * pool.price;
+  }
+  let totalNftValue = 0;
+  [...player.nfts, ...player.stakedNfts].forEach(nftId => {
+    const nft = nfts[nftId];
+    if(nft) totalNftValue += nft.value;
+  });
+  return player.cash + totalHold + totalLpValue + totalPendingToken + totalNftValue;
+}
+
+// --- TOKEN AND POOL MANAGEMENT ---
+async function checkToken(symbol, contract) {
+  checkResult.innerHTML = `<div class="small">Checking ${symbol}-${contract} ...</div>`;
+  const tokenId = `${symbol}-${contract}`;
+  try {
+    const res = await fetch(ALCOR_TOKEN_ENDPOINT + encodeURIComponent(tokenId));
+    if(!res.ok) {
+      checkResult.innerHTML = `<div class="small" style="color:#f4a6a6">Token not found via Alcor: ${tokenId}</div>`;
+      log(`Alcor token endpoint returned ${res.status} for ${tokenId}`, 'bad');
+      return null;
+    }
+    const info = await res.json();
+    const pool = makePoolFromTokenInfo(info);
+    checkResult.innerHTML = `<div class="small">Found ${pool.symbol} @ ${pool.contract}<br>Price: <strong>${pool.price.toFixed(6)}</strong> WAX — Liquidity: ${Math.round(pool.reserveWax * 2)}</div>
+      <div style="margin-top:8px"><button id="addFoundBtn" class="btn primary">Add to pools</button></div>`;
+    document.getElementById('addFoundBtn').onclick = () => { addPool(pool); checkResult.innerHTML = `<div class="small">Added ${pool.symbol}</div>`; };
+    log(`Found token ${tokenId} via /api/v2/tokens`);
+    return pool;
+  } catch(err) {
+    log(`Error checking token: ${err}`, 'bad');
+    checkResult.innerHTML = `<div class="small" style="color:#f4a6a6">Error checking token — network or endpoint failed</div>`;
+    return null;
+  }
+}
+async function loadPoolsForContract(contract) {
+  try {
+    const res = await fetch(ALCOR_MARKETS_ENDPOINT);
+    if(!res.ok) { log(`Markets fetch failed ${res.status}`, 'bad'); return []; }
+    const markets = await res.json();
+    const matched = markets.filter(m =>
+      (m.base_contract && m.base_contract === contract) ||
+      (m.id && typeof m.id === 'string' && m.id.includes(contract)) ||
+      (m.base_symbol && m.base_symbol.toLowerCase().includes(contract.split('.')[0]))
+    );
+    const mapped = matched.map(m => {
+      const price = parseFloat(m.price || m.last_price) || (Math.random()*0.5+0.01);
+      const liquidity = parseFloat(m.liquidity) || (Math.random()*4000+2000);
+      const reserveWax = liquidity / 2;
+      const reserveToken = price > 0 ? reserveWax / price : 10000;
+      const totalLpSupply = Math.sqrt(reserveWax * reserveToken);
+      const emissionRate = Math.random() * 0.01 + 0.001;
+      return {
+        id: m.id || `${m.base_contract}:${m.base_symbol}`,
+        symbol: m.base_symbol || (m.name ? m.name.split('/')[0] : 'TKN'),
+        contract: m.base_contract || contract,
+        name: m.base_symbol ? `${m.base_symbol}/WAX` : (m.name || m.id),
+        price, reserveWax, reserveToken, supply: parseFloat(m.supply) || (Math.random()*20000+5000),
+        totalLpSupply, stakedLpTotal: 0, emissionRate, history: [], marketSentiment: 0
+      };
+    });
+    if(mapped.length === 0) log(`No markets found in Alcor markets list for contract: ${contract}`);
+    else log(`Loaded ${mapped.length} pools for contract ${contract} from markets list`);
+    return mapped;
+  } catch(e) {
+    log(`Error loading markets: ${e}`, 'bad');
+    return [];
+  }
+}
+function addPool(p) {
+  if(pools.find(x => x.id === p.id)) { log(`Pool already exists: ${p.id}`); return; }
+  p.history = p.history || [];
+  p.history.push(p.price);
+  pools.push(p);
+  saveCache();
+  updatePoolSelectors();
+  refreshChart();
+  log(`Added pool ${p.name} (${p.id})`);
+}
+
+// --- UI RENDERING ---
+function renderPools(filter='') {
+  const f = filter.trim().toLowerCase();
+  
+  poolList.innerHTML = '';
+  selectPool.innerHTML = '';
+  const filteredPools = pools.filter(p => !f || p.name.toLowerCase().includes(f) || p.id.toLowerCase().includes(f) || p.symbol.toLowerCase().includes(f));
+  
+  filteredPools.forEach((p, i) => {
+    const originalIndex = pools.findIndex(pool => pool.id === p.id);
+    const el = document.createElement('div');
+    el.className = `pool ${originalIndex === selectedPoolIdx ? 'active' : ''}`;
+    let statusIcons = '';
+    if(activeAlphaDrop?.type === 'insider' && activeAlphaDrop.targetSymbol === p.symbol) statusIcons += `<span class="status-icon" title="Insider Tip Active!">🔥</span>`;
+    if(activeAlphaDrop?.type === 'lp_incentive' && activeAlphaDrop.targetSymbol === p.symbol) statusIcons += `<span class="status-icon" title="LP Incentives Active!">💧</span>`;
+    el.innerHTML = `<div style="flex:1"><div style="font-weight:700">${p.name}${statusIcons}</div><div class="small">${p.id}</div></div>
+      <div style="text-align:right"><div class="small">${p.price.toFixed(6)} WAX</div><div class="small">Liq:${Math.round(p.reserveWax * 2)}</div></div>`;
+    el.title = `${p.name} (${p.price.toFixed(6)} WAX, Liq: ${Math.round(p.reserveWax * 2)})`;
+    el.onclick = () => { selectPoolIdx(originalIndex); };
+    poolList.appendChild(el);
+    const opt = document.createElement('option');
+    opt.value = originalIndex;
+    opt.textContent = `${p.name} (${p.price.toFixed(6)})`;
+    selectPool.appendChild(opt);
+  });
+  
+  selectPool.value = String(selectedPoolIdx);
+  renderPairSelector();
+}
+
+function selectPoolIdx(idx) {
+  if (idx < 0 || idx >= pools.length) return;
+  selectedPoolIdx = idx;
+  renderPools(filterInput.value);
+  refreshChart();
+  showPortfolio(manuallySelectedPlayerIdx);
+  selectPool.value = String(idx);
+  
+  document.querySelectorAll('.pair-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === idx);
+  });
+}
+
+function renderPairSelector() {
+  pairSelector.innerHTML = '';
+  pools.forEach((p, i) => {
+    const dot = document.createElement('div');
+    dot.className = `pair-dot ${i === selectedPoolIdx ? 'active' : ''}`;
+    dot.title = `${p.name} (${p.price.toFixed(6)} WAX, Liq: ${Math.round(p.reserveWax * 2)})`;
+    dot.onclick = () => { selectPoolIdx(i); };
+    pairSelector.appendChild(dot);
+  });
+}
+function updatePoolSelectors() {
+  renderPools(filterInput.value);
+  renderPairSelector();
+}
+function refreshChart() {
+  const labels = pools[0] ? pools[0].history.map((_, i) => i) : [0];
+  const datasets = pools.map((p, idx) => ({
+    label: p.name,
+    data: p.history.length ? p.history : [p.price],
+    borderWidth: 2,
+    tension: 0.25,
+    pointRadius: 0,
+    borderColor: idx === selectedPoolIdx ? 'var(--accent-main)' : `hsla(${idx*40}, 80%, 60%, 0.5)`
+  }));
+  if(chart) chart.destroy();
+  chart = new Chart(chartCanvas, {
+    type: 'line',
+    data: { labels: labels.length ? labels : [0], datasets },
+    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cfe7ff' } } }, scales: { x: { ticks: { color: '#98a7bf' } }, y: { ticks: { color: '#cfe7ff' } } } }
+  });
+}
+function initPlayers() {
+  players = [
+    {id:0,name:'Alpha',cash:2000,faction:'manual',strategy:'manual'},
+    {id:1,name:'Moby',cash:50000,faction:'whale',strategy:'conservative'},
+    {id:2,name:'Orca',cash:35000,faction:'whale',strategy:'conservative'},
+    {id:3,name:'Narwhal',cash:75000,faction:'whale',strategy:'conservative'},
+    {id:4,name:'Levi',cash:100000,faction:'whale',strategy:'conservative'},
+    {id:5,name:'Ada',cash:2500,faction:'techie',strategy:'dca_lp'},
+    {id:6,name:'Babbage',cash:3000,faction:'techie',strategy:'dca_lp'},
+    {id:7,name:'Pascal',cash:1800,faction:'techie',strategy:'dca_lp'},
+    {id:8,name:'Turing',cash:4000,faction:'techie',strategy:'dca_lp'},
+    {id:9,name:'Chad',cash:500,faction:'degen',strategy:'ape_in'},
+    {id:10,name:'Karen',cash:800,faction:'degen',strategy:'fomo_fud'},
+    {id:11,name:'Wojak',cash:300,faction:'degen',strategy:'fomo_fud'},
+    {id:12,name:'Aura',cash:1500,faction:'techie',strategy:'sniper_bot'}
+  ].map(p => ({...p, initialCash: p.cash, holdings: {}, lpHoldings: {}, stakedLp: {}, pendingTokenRewards: {}, nfts: [], stakedNfts: [], stakedNftsByPool: {}, pendingRewards: 0, pendingWaxRewards: 0, questProgress: {}}));
+  renderAvatars();
+}
+function renderAvatars() {
+  const sortedPlayers = players.slice().sort((a,b) => calculateNetWorth(b) - calculateNetWorth(a));
+  
+  avatars.innerHTML = '';
+  players.forEach((pl, idx) => {
+    const currentValue = calculateNetWorth(pl);
+    const nftBoost = calculateNftBoost(pl);
+    const rank = sortedPlayers.findIndex(p => p.id === pl.id) + 1;
+    let emoji = '😐';
+    if (currentValue > pl.initialCash * 1.5) emoji = '🚀';
+    else if (currentValue > pl.initialCash * 1.2) emoji = '😎';
+    else if (currentValue > pl.initialCash * 1.05) emoji = '😊';
+    else if (currentValue < pl.initialCash * 0.8) emoji = '😭';
+    else if (currentValue < pl.initialCash) emoji = '😞';
+    const d = document.createElement('div');
+    d.className = `avatar ${idx === manuallySelectedPlayerIdx ? 'active' : ''}`;
+    d.id = 'player' + idx;
+    d.innerHTML = `<div class="player-rank">#${rank}</div><div style="font-weight:700">${pl.name}</div><div style="font-size:22px" id="sm${idx}">${emoji}</div><div class="small">${pl.faction} ${nftBoost > 0 ? `+${nftBoost.toFixed(2)}x` : ''}</div>`;
+    d.onclick = () => {
+      manuallySelectedPlayerIdx = idx;
+      showPortfolio(idx);
+      if (portfolioViewMode === 'live') {
+        lockViewBtn.classList.add('active');
+        liveViewBtn.classList.remove('active');
+        portfolioViewMode = 'locked';
+        log('Portfolio view locked to manual player.', 'info');
+      }
+      document.querySelectorAll('.avatar').forEach(av => av.classList.remove('active'));
+      d.classList.add('active');
+    };
+    avatars.appendChild(d);
+  });
+}
+function showPortfolio(idx) {
+  const pl = players[idx];
+  let html = `<div style="font-weight:700">${pl.name} Portfolio (${pl.faction})</div>`;
+  html += `<div>Net Worth: <strong id="netWorthValue">${calculateNetWorth(pl).toFixed(2)} WAX</strong></div>`;
+  html += `<div>Cash: ${pl.cash.toFixed(2)} WAX</div>`;
+  
+  html += `<h2 style="font-size:16px; margin-top:12px;">Tokens & LP</h2>`;
+  for(const sym in pl.holdings) {
+    const amt = pl.holdings[sym];
+    if(amt > 0) {
+      const pool = pools.find(pp => pp.symbol === sym);
+      const val = pool ? amt * pool.price : 0;
+      html += `<div style="display:flex; justify-content:space-between;"><div>${sym}: ${amt.toFixed(3)} (value ${val.toFixed(2)} WAX)</div> <button class="btn small" onclick="flipToken(${idx}, '${sym}', ${amt})">Flip All</button></div>`;
+    }
+  }
+
+  for(const sym in pl.lpHoldings) {
+    const amt = pl.lpHoldings[sym];
+    if(amt > 0) {
+      const pool = pools.find(pp => pp.symbol === sym);
+      if(!pool || pool.totalLpSupply <= 0) continue;
+      const share = amt / pool.totalLpSupply;
+      const val = share * (pool.reserveWax + pool.reserveToken * pool.price);
+      html += `<div style="display:flex; justify-content:space-between;"><div>LP ${sym}: ${amt.toFixed(3)} (val ${val.toFixed(2)})</div> <div><button class="btn small" onclick="stakeLpAll(${idx},'${sym}')">Stake</button> <button class="btn small" onclick="removeLpAll(${idx},'${sym}')">Remove</button></div></div>`;
+    }
+  }
+  for(const sym in pl.stakedLp) {
+    const amt = pl.stakedLp[sym];
+    if(amt > 0) {
+      const pool = pools.find(pp => pp.symbol === sym);
+      const share = amt / pool.totalLpSupply;
+      const val = share * (pool.reserveWax + pool.reserveToken * pool.price);
+      html += `<div style="display:flex; justify-content:space-between;"><div>Staked LP ${sym}: ${amt.toFixed(3)} (val ${val.toFixed(2)})</div> <button class="btn small" onclick="unstakeLpAll(${idx},'${sym}')">Unstake</button></div>`;
+    }
+  }
+  for(const sym in pl.pendingTokenRewards) {
+    const amt = pl.pendingTokenRewards[sym] || 0;
+    if(amt > 0) {
+      const pool = pools.find(pp => pp.symbol === sym);
+      const val = pool ? amt * pool.price : 0;
+      html += `<div style="display:flex; justify-content:space-between;"><div>Pending ${sym}: ${amt.toFixed(3)} (val ${val.toFixed(2)})</div> <button class="btn small" onclick="claimTokenRewards(${idx},'${sym}')">Claim</button></div>`;
+    }
+  }
+  
+  html += `<h2 style="font-size:16px; margin-top:12px;">NFTs & Rewards</h2>`;
+  // MODIFIED: Added a claim button for WAX rewards
+  if(pl.stakedNfts.length > 0) {
+      html += `<div>Pending WAX Rewards: <span id="pendingWaxRewards">${pl.pendingWaxRewards.toFixed(2)}</span> WAX <button class="btn small" onclick="claimWaxFromStaking(${idx})" id="claimWaxBtn">Claim WAX</button></div>`;
+  }
+  
+  html += `<div style="font-weight:700; margin-top: 8px;">NFT Inventory</div>`;
+  if(pl.nfts.length === 0 && pl.stakedNfts.length === 0) {
+    html += `<div class="small" style="margin-top:8px;">You have no NFTs.</div>`;
+  } else {
+    html += `<div class="nft-inventory">`;
+    pl.nfts.forEach(nftId => {
+      const nft = nfts[nftId];
+      if(!nft) return;
+      
+      const isNonePack = nft.type === 'none_pack';
+      const isNoneGamble = nft.type === 'none_gamble';
+      const isPackNft = nft.type === 'pack';
+      const isScrap = nft.type === 'scrap';
+      const canFuse = !isScrap && !isNoneGamble && !isNonePack && !isPackNft && pl.nfts.some(id => id !== nftId && nfts[id].tier === nft.tier && nfts[id].type !== 'none_gamble' && nfts[id].type !== 'none_pack' && nfts[id].type !== 'pack');
+      
+      // NEW: Dynamic class based on NFT type and if it has been opened successfully
+      const nftClass = isScrap ? 'scrap-nft' : (isNoneGamble ? 'none-opened-nft' : (isNonePack ? 'none-nft' : (isPackNft ? 'pack-nft' : 'nft-item')));
+      
+      html += `<div class="${nftClass}" title="${nft.name} - ${nft.tier} - Value: ${nft.value.toFixed(2)} WAX">
+        <div><strong>${nft.name}</strong></div>
+        <div class="small">${nft.tier}</div>
+        <div class="small">Value: ${nft.value.toFixed(2)} WAX</div>
+        <div class="row" style="margin-top: 8px;">
+          ${isNonePack ? `<button class="btn small" onclick="event.stopPropagation(); openNonePack(${idx}, ${nftId})">Open</button>` : ''}
+          ${isNoneGamble ? `
+            <div class="small" style="text-align: left; padding: 4px;">Current Value: <strong>${nft.currentValue.toFixed(2)} WAX</strong></div>
+            <button class="btn small" onclick="event.stopPropagation(); gambleNoneNft(${idx}, ${nftId})">Double or Nothing</button>
+            <button class="btn small danger" onclick="event.stopPropagation(); burnNoneNft(${idx}, ${nftId})">Burn for ${nft.currentValue.toFixed(2)} WAX</button>` : ''}
+          ${isPackNft ? `<button class="btn small" onclick="event.stopPropagation(); openNftPack(${idx}, ${nftId})">Open</button>` : ''}
+          ${isScrap ? `<button class="btn small warn" onclick="event.stopPropagation(); burnNft(${idx}, ${nftId})">Burn</button>` : ''}
+          ${!isScrap && !isNoneGamble && !isNonePack && !isPackNft ? `<button class="btn small" onclick="event.stopPropagation(); showStakeMenu(${idx}, ${nftId})">Stake</button>` : ''}
+          ${!isScrap && !isNoneGamble && !isNonePack && !isPackNft ? `<button class="btn small warn" onclick="event.stopPropagation(); burnNft(${idx}, ${nftId})">Burn</button>` : ''}
+          ${!isScrap && !isNoneGamble && !isNonePack && !isPackNft ? `<button class="btn small fuse-button ${canFuse ? '' : 'disabled-fuse'}" onclick="event.stopPropagation(); if(${canFuse}) fuseNfts(${idx}, ${nftId})">Fuse</button>` : ''}
+        </div>
+      </div>`;
+    });
+    
+    // Display staked NFTs
+    for(const poolSymbol in pl.stakedNftsByPool) {
+      pl.stakedNftsByPool[poolSymbol].forEach(nftId => {
+        const nft = nfts[nftId];
+        if(!nft) return;
+        const nftClass = nft.type === 'none_gamble' ? 'none-opened-nft' : 'nft-item';
+        
+        html += `<div class="${nftClass} selected" title="${nft.name} - ${nft.tier} - Staking for ${poolSymbol} rewards">
+          <div><strong>${nft.name}</strong></div>
+          <div class="small">Staking for: ${poolSymbol}</div>
+          <div class="small">Value: ${nft.value.toFixed(2)} WAX</div>
+          <div class="row" style="margin-top: 8px;">
+            ${nft.type !== 'none_gamble' ? `<button class="btn small" onclick="event.stopPropagation(); unstakeNft(${idx}, ${nftId}, '${poolSymbol}')">Unstake</button>` : ''}
+          </div>
+        </div>`;
+      });
+    }
+
+    html += `</div>`;
+  }
+  
+  portfolio.innerHTML = html;
+  document.querySelectorAll('.avatar').forEach(av => av.classList.remove('active'));
+  document.getElementById('player' + idx).classList.add('active');
+  renderAvatars();
+}
+function showStakeMenu(playerIdx, nftId) {
+    const stakeOptions = pools.map(p => {
+        return `<button class="btn small" onclick="stakeNft(${playerIdx}, ${nftId}, '${p.symbol}')">Stake for ${p.symbol}</button>`;
+    }).join('');
+
+    const modalHtml = `
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1001;display:flex;align-items:center;justify-content:center;">
+            <div class="card" style="width:300px;text-align:center;">
+                <h3>Stake NFT for Rewards</h3>
+                <p class="small">Choose a token farm to stake this NFT on:</p>
+                <div class="row" style="justify-content:center; flex-direction:column;">
+                    ${stakeOptions}
+                </div>
+                <button class="btn danger" onclick="this.parentNode.parentNode.remove()">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+function renderLeaderboard() {
+  leaderboardList.innerHTML = '';
+  const sortedPlayers = players.slice().sort((a,b) => calculateNetWorth(b) - calculateNetWorth(a));
+  sortedPlayers.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'leaderboard-item';
+    item.innerHTML = `<div>#${i+1} ${p.name} (${p.faction})</div> <div>${calculateNetWorth(p).toFixed(2)} WAX</div>`;
+    leaderboardList.appendChild(item);
+  });
+}
+
+// New function to perform the fuse action
+window.fuseNfts = function(playerIdx, nftId1) {
+  const player = players[playerIdx];
+  const nft1 = nfts[nftId1];
+
+  const fuseNftId2 = player.nfts.find(id => id !== nftId1 && nfts[id].tier === nft1.tier);
+  
+  if (!fuseNftId2) {
+    log('Cannot find a matching NFT of the same tier to fuse.', 'bad');
+    return;
+  }
+
+  const nft2 = nfts[fuseNftId2];
+  
+  const tierOrder = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Protocol'];
+  const nextTierIndex = tierOrder.indexOf(nft1.tier) + 1;
+  
+  if (nextTierIndex >= tierOrder.length) {
+    log('Cannot fuse NFTs of this tier.', 'bad');
+    return;
+  }
+  
+  const pl = players[playerIdx];
+  pl.nfts = pl.nfts.filter(id => id !== nftId1 && id !== fuseNftId2);
+
+  const newNft = generateFusedNft(nft1.tier);
+  pl.nfts.push(newNft.id);
+  log(`${pl.name} fused two ${nft1.tier} NFTs into ${newNft.name} (${newNft.tier})`, 'good', playerIdx);
+  showPortfolio(playerIdx);
+  renderAvatars();
+  addToLiquidity(pl, 50, null);
+};
+
+// --- NFT AND LP FUNCTIONS ---
+const TIER_YIELD_RATES = {
+  'Common': 0.005,
+  'Uncommon': 0.012,
+  'Rare': 0.025,
+  'Epic': 0.05,
+  'Legendary': 0.1,
+  'Protocol': 0.2
+};
+const TIER_BOOSTS = {
+  'Common': 0.1,
+  'Uncommon': 0.3,
+  'Rare': 0.7,
+  'Epic': 1.5,
+  'Legendary': 3.0,
+  'Protocol': 5.0
+};
+
+function getTierBaseValue(tier) {
+  const tiers = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Protocol'];
+  const tierIndex = tiers.indexOf(tier);
+  return 50 * Math.pow(2, tierIndex);
+}
+
+function calculateNftBoost(player) {
+  let totalBoost = 0;
+  for (const poolSymbol in player.stakedNftsByPool) {
+    totalBoost += player.stakedNftsByPool[poolSymbol].reduce((sum, nftId) => {
+        const nft = nfts[nftId];
+        return sum + (TIER_BOOSTS[nft.tier] || 0);
+    }, 0);
+  }
+  return totalBoost;
+}
+
+function generateNft(packType) {
+  const tiers = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Protocol'];
+  let tier;
+  if(packType === 'protocol_drop') {
+    tier = 'Protocol';
+  } else {
+    const rand = Math.random();
+    if(packType === 'basic') {
+      if(rand < 0.7) tier = 'Common';
+      else if(rand < 0.95) tier = 'Uncommon';
+      else tier = 'Rare';
+    } else if(packType === 'premium') {
+      if(rand < 0.5) tier = 'Uncommon';
+      else if(rand < 0.85) tier = 'Rare';
+      else if(rand < 0.98) tier = 'Epic';
+      else tier = 'Legendary';
+    } else if (packType === 'elite') {
+      if(rand < 0.4) tier = 'Rare';
+      else if(rand < 0.75) tier = 'Epic';
+      else if(rand < 0.95) tier = 'Legendary';
+      else tier = 'Protocol';
+    } else { // NEW: Leftovers Pack logic
+      if(rand < 0.5) { // 50% chance for a Scrap NFT
+        const scrapNft = {id: nfts.length, name: `Scrap #${nfts.length}`, tier: 'Scrap', yieldRate: 0, value: 0.5 + Math.random() * 2, type: 'scrap'};
+        nfts.push(scrapNft);
+        return scrapNft;
+      }
+      else if (rand < 0.85) tier = 'Common'; // 35% chance for a Common NFT
+      else tier = 'Uncommon'; // 15% chance for an Uncommon NFT
+    }
+  }
+  
+  if (tier !== 'Scrap') {
+    const yieldRate = TIER_YIELD_RATES[tier] * (1 + (Math.random() * 0.2));
+    const nft = {id:nfts.length, name:`NFT #${nfts.length}`, tier, yieldRate, value: getTierBaseValue(tier), type: 'standard'};
+    nfts.push(nft);
+    return nft;
+  }
+}
+
+// NEW: Function to generate a new pack NFT of type none_pack
+function generateNonePackNft(packCost) {
+  const nft = {
+    id: nfts.length,
+    name: `NONE Pack ${packCost} #${nfts.length}`,
+    tier: 'Pack',
+    value: packCost,
+    type: 'none_pack'
+  };
+  nfts.push(nft);
+  return nft;
+}
+
+// MODIFIED: This function now generates a new "none_gamble" NFT
+function generateNoneGambleNft(packCost, currentValue) {
+  const nft = {
+    id: nfts.length,
+    name: `NONE Gamble #${nfts.length}`,
+    tier: 'NONE',
+    value: packCost,
+    type: 'none_gamble',
+    currentValue: currentValue
+  };
+  nfts.push(nft);
+  return nft;
+}
+
+function generateFusedNft(tier) {
+  const tierOrder = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Protocol'];
+  const nextTierIndex = tierOrder.indexOf(tier) + 1;
+  if (nextTierIndex >= tierOrder.length) return null;
+
+  const newTier = tierOrder[nextTierIndex];
+  
+  const yieldRate = TIER_YIELD_RATES[newTier] * (1 + (Math.random() * 0.2) + 0.2);
+  
+  const nft = {id:nfts.length, name:`Fused NFT #${nfts.length}`, tier: newTier, yieldRate, value: getTierBaseValue(newTier) * 1.5, type: 'standard'};
+  nfts.push(nft);
+  return nft;
+}
+
+// Function to generate and add an NFT pack to inventory
+window.buyNftPack = function(playerIdx, packType) {
+  const pl = players[playerIdx];
+  const packCosts = {
+    basic: { cost: 50, name: 'Basic Pack' },
+    premium: { cost: 200, name: 'Premium Pack' },
+    elite: { cost: 500, name: 'Elite Pack' },
+    leftovers: { cost: 10, name: 'Leftovers Pack'} // NEW: Leftovers pack cost
+  };
+  const packInfo = packCosts[packType];
+  if(pl.cash < packInfo.cost) { log(`${pl.name} insufficient WAX for ${packInfo.name}`, 'bad'); return; }
+  pl.cash -= packInfo.cost;
+
+  const nftPack = {
+    id: nfts.length,
+    name: `${packInfo.name} #${nfts.length}`,
+    tier: 'Pack',
+    value: packInfo.cost * 0.8,
+    type: 'pack',
+    packType: packType
+  };
+  nfts.push(nftPack);
+  pl.nfts.push(nftPack.id);
+
+  log(`${pl.name} bought a ${packInfo.name}. You can open it from your inventory.`, 'good', playerIdx);
+  
+  checkQuestProgress(pl, 'buyNftPack', 1);
+  checkQuestProgress(pl, 'totalNFTs', 1);
+
+  showPortfolio(playerIdx);
+  renderAvatars();
+  addToLiquidity(pl, packInfo.cost * 0.2, null);
+};
+
+// Function to open a pack NFT
+window.openNftPack = function(playerIdx, nftId) {
+    const pl = players[playerIdx];
+    const packNft = nfts[nftId];
+
+    if (!packNft || packNft.type !== 'pack') {
+        log("This isn't a pack NFT!", 'bad', playerIdx);
+        return;
+    }
+
+    // Remove the pack NFT from inventory
+    pl.nfts = pl.nfts.filter(id => id !== nftId);
+
+    // Generate the new NFT based on the pack type
+    const newNft = generateNft(packNft.packType);
+    if (newNft) {
+        pl.nfts.push(newNft.id);
+        log(`${pl.name} opened a ${packNft.name} and received ${newNft.name} (${newNft.tier})!`, 'good', playerIdx);
+    } else {
+        log(`${pl.name} opened a ${packNft.name}, but nothing was inside!`, 'bad', playerIdx);
+    }
+    
+    showPortfolio(playerIdx);
+    renderAvatars();
+}
+
+
+// MODIFIED: This function now creates a pack NFT instead of immediately opening it
+window.buyNonePack = function(playerIdx, packCost) {
+  const pl = players[playerIdx];
+  const noneHoldings = pl.holdings.NONE || 0;
+  
+  if (noneHoldings < packCost) {
+    log(`${pl.name} needs ${packCost} NONE to open this pack. You have ${noneHoldings.toFixed(2)} NONE.`, 'bad', playerIdx);
+    return;
+  }
+  
+  pl.holdings.NONE -= packCost;
+  
+  // Creates a none_pack type NFT that can be opened
+  const nonePackNft = generateNonePackNft(packCost);
+  pl.nfts.push(nonePackNft.id);
+
+  log(`${pl.name} bought a NONE pack for ${packCost} NONE. You can now open it.`, 'good', playerIdx);
+
+  checkQuestProgress(pl, 'spendNONE', packCost);
+  checkQuestProgress(pl, 'totalNFTs', 1);
+  
+  showPortfolio(playerIdx);
+  renderAvatars();
+};
+
+// MODIFIED: This function now creates the new "none_gamble" NFT
+window.openNonePack = function(playerIdx, nftId) {
+  const pl = players[playerIdx];
+  const nonePackNft = nfts[nftId];
+
+  if (!nonePackNft || nonePackNft.type !== 'none_pack') {
+    log("This isn't a NONE pack NFT!", 'bad', playerIdx);
+    return;
+  }
+
+  // Remove the pack NFT from inventory
+  pl.nfts = pl.nfts.filter(id => id !== nftId);
+  
+  // Create the new "none_gamble" NFT with the pack's value as the starting value
+  const newNoneGambleNft = generateNoneGambleNft(nonePackNft.value, nonePackNft.value);
+  pl.nfts.push(newNoneGambleNft.id);
+
+  log(`${pl.name} opened a NONE pack and received a gamble NFT!`, 'good', playerIdx);
+  
+  showPortfolio(playerIdx);
+  renderAvatars();
+}
+
+// NEW: Function to double the value or lose it all
+window.gambleNoneNft = function(playerIdx, nftId) {
+  const pl = players[playerIdx];
+  const nft = nfts[nftId];
+
+  if (!nft || nft.type !== 'none_gamble') {
+    log("This isn't a NONE gamble NFT!", 'bad', playerIdx);
+    return;
+  }
+
+  if (Math.random() < 0.5) {
+    // Success: double the value and log it
+    const previousValue = nft.currentValue;
+    nft.currentValue *= 2;
+    log(`${pl.name} gambled and won! Value doubled from ${previousValue.toFixed(2)} WAX to ${nft.currentValue.toFixed(2)} WAX.`, 'good', playerIdx);
+  } else {
+    // Failure: remove the NFT and log the loss
+    pl.nfts = pl.nfts.filter(id => id !== nftId);
+    log(`${pl.name} gambled and lost! The NONE gamble NFT disappeared.`, 'bad', playerIdx);
+  }
+
+  showPortfolio(playerIdx);
+  renderAvatars();
+}
+
+// MODIFIED: New function to burn NONE NFTs for their current value
+window.burnNoneNft = function(playerIdx, nftId) {
+  const pl = players[playerIdx];
+  const nft = nfts[nftId];
+  
+  if (!nft || nft.type !== 'none_gamble') {
+    log('Invalid NFT to burn. This is not a NONE gamble NFT.', 'bad', playerIdx);
+    return;
+  }
+  
+  // Remove the NFT from the player's inventory
+  pl.nfts = pl.nfts.filter(id => id !== nftId);
+  
+  const reward = nft.currentValue;
+  pl.cash += reward;
+  log(`${pl.name} successfully burned a NONE gamble NFT and received ${reward.toFixed(2)} WAX!`, 'good', playerIdx);
+  
+  showPortfolio(playerIdx);
+  renderAvatars();
+}
+
+// Function to stake a standard NFT to a specific token farm
+window.stakeNft = function(playerIdx, nftId, poolSymbol) {
+  const pl = players[playerIdx];
+  const nft = nfts[nftId];
+  const idx = pl.nfts.indexOf(nftId);
+  if(idx === -1) { log('Invalid NFT to stake', 'bad'); return; }
+  if(nft.type === 'none_gamble' || nft.type === 'pack' || nft.type === 'none_pack' || nft.type === 'scrap') { log('Cannot stake this type of NFT.', 'bad'); return;}
+  
+  pl.nfts.splice(idx, 1);
+  if (!pl.stakedNftsByPool[poolSymbol]) {
+    pl.stakedNftsByPool[poolSymbol] = [];
+  }
+  pl.stakedNftsByPool[poolSymbol].push(nftId);
+  pl.stakedNfts.push(nftId);
+  
+  // Add 5 WAX to liquidity for staking
+  addToLiquidity(pl, 5, null);
+  
+  log(`${pl.name} staked NFT #${nftId} to the ${poolSymbol} farm.`, 'info', playerIdx);
+  
+  checkQuestProgress(pl, 'stakeNFT', 1);
+  
+  showPortfolio(playerIdx);
+};
+
+// Function to unstake an NFT from a specific token farm
+window.unstakeNft = function(playerIdx, nftId, poolSymbol) {
+  const pl = players[playerIdx];
+  const nft = nfts[nftId];
+  const poolNfts = pl.stakedNftsByPool[poolSymbol] || [];
+  const idx = poolNfts.indexOf(nftId);
+
+  if(idx === -1) { log('Invalid NFT to unstake', 'bad'); return; }
+  
+  poolNfts.splice(idx, 1);
+  pl.stakedNfts = pl.stakedNfts.filter(id => id !== nftId);
+  pl.nfts.push(nftId);
+
+  if (poolNfts.length === 0) {
+      delete pl.stakedNftsByPool[poolSymbol];
+  }
+  
+  log(`${pl.name} unstaked NFT #${nftId} from the ${poolSymbol} farm.`, 'info', playerIdx);
+  showPortfolio(playerIdx);
+};
+
+window.burnNft = function(playerIdx, nftId) {
+  const pl = players[playerIdx];
+  const nft = nfts[nftId];
+  let idx = pl.nfts.indexOf(nftId);
+  
+  if(idx === -1) {
+    log(`${pl.name}: NFT is staked and cannot be burned. Please unstake it first.`, 'bad', playerIdx);
+    return;
+  }
+  
+  const burnReward = nft.value * 0.1;
+  pl.cash += burnReward;
+
+  if (pl.nfts.includes(nftId)) {
+    pl.nfts.splice(pl.nfts.indexOf(nftId), 1);
+  }
+  log(`${pl.name} burned ${nft.name} (${nft.tier}) and received ${burnReward.toFixed(2)} WAX.`, 'good', playerIdx);
+  showPortfolio(playerIdx);
+}
+window.flipToken = function(playerIdx, symbol, amount) {
+  const pl = players[playerIdx];
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  
+  sellToken(pl, symbol, amount);
+  const waxReceived = amount * pool.price;
+  
+  const profit = waxReceived - (amount * pool.price);
+  log(`${pl.name} flipped ${amount.toFixed(3)} ${symbol} for a profit of ${profit.toFixed(2)} WAX.`, profit > 0 ? 'good' : 'bad', playerIdx);
+}
+
+// MODIFIED: Corrected claim logic
+window.claimTokenRewards = function(playerIdx, symbol) {
+  const pl = players[playerIdx];
+  const amt = pl.pendingTokenRewards[symbol] || 0;
+  
+  if (amt <= 0) {
+    log(`${pl.name} has no ${symbol} rewards to claim.`, 'bad', playerIdx);
+    return;
+  }
+  
+  // Add the pending rewards to the player's holdings
+  pl.holdings[symbol] = (pl.holdings[symbol] || 0) + amt;
+  
+  // Reset the pending rewards for this token to 0
+  pl.pendingTokenRewards[symbol] = 0;
+  
+  log(`${pl.name} claimed ${amt.toFixed(3)} ${symbol} in token rewards.`, 'good', playerIdx);
+  showPortfolio(playerIdx);
+};
+
+// MODIFIED: Corrected claim logic
+window.claimWaxFromStaking = function(playerIdx) {
+  const pl = players[playerIdx];
+  
+  if (pl.pendingWaxRewards <= 0) {
+    log(`${pl.name} has no WAX rewards to claim.`, 'bad', playerIdx);
+    return;
+  }
+  
+  // Add the pending WAX rewards to the player's cash
+  pl.cash += pl.pendingWaxRewards;
+  
+  // Reset the pending WAX rewards to 0
+  pl.pendingWaxRewards = 0;
+  
+  log(`${pl.name} claimed ${pl.pendingWaxRewards.toFixed(2)} WAX in staking rewards.`, 'good', playerIdx);
+  showPortfolio(playerIdx);
+};
+
+// --- QUESTS SYSTEM ---
+function initQuests() {
+  quests = [
+    { id: 'quest1', title: 'First Steps', description: 'Buy your first NFT pack.', target: 'buyNftPack', targetValue: 1, reward: { type: 'wax', amount: 50 }, completed: false, claimed: false },
+    { id: 'quest2', title: 'Liquidity Provider', description: 'Add 100 WAX worth of liquidity to any pool.', target: 'addLiquidity', targetValue: 100, reward: { type: 'nft_pack', pack: 'basic' }, completed: false, claimed: false },
+    { id: 'quest3', title: 'NFT Hoarder', description: 'Acquire 5 NFTs.', target: 'totalNFTs', targetValue: 5, reward: { type: 'wax', amount: 200 }, completed: false, claimed: false },
+    { id: 'quest4', title: 'Staking Pioneer', description: 'Stake 2 NFTs.', target: 'stakeNFT', targetValue: 2, reward: { type: 'nft_pack', pack: 'premium' }, completed: false, claimed: false },
+    { id: 'quest5', title: 'NONE Gambler', description: 'Open a NONE pack.', target: 'spendNONE', targetValue: 100, reward: { type: 'nft_pack', pack: 'elite' }, completed: false, claimed: false }
+  ];
+  renderQuests();
+}
+
+function checkQuestProgress(player, action, value) {
+  quests.forEach(quest => {
+    if (!quest.completed && quest.target === action) {
+      if (quest.id === 'quest3') {
+        const totalNfts = player.nfts.length + player.stakedNfts.length;
+        player.questProgress[quest.id] = totalNfts;
+      } else if (quest.id === 'quest4') {
+        player.questProgress[quest.id] = player.stakedNfts.length;
+      } else {
+        player.questProgress[quest.id] = (player.questProgress[quest.id] || 0) + value;
+      }
+
+      if (player.questProgress[quest.id] >= quest.targetValue) {
+        log(`${player.name} completed quest: "${quest.title}"!`, 'good', player.id);
+        quest.completed = true;
+        renderQuests();
+        showNotification(`${player.name} completed quest: "${quest.title}"!`);
+      }
+    }
+  });
+}
+
+function renderQuests() {
+  questsList.innerHTML = '';
+  quests.forEach(quest => {
+    const player = players[manuallySelectedPlayerIdx];
+    const progress = player.questProgress[quest.id] || 0;
+    const progressPercentage = Math.min(100, (progress / quest.targetValue) * 100);
+    const isCompleted = quest.completed;
+    const isClaimed = quest.claimed;
+    
+    const questEl = document.createElement('div');
+    questEl.className = 'quest-item';
+    questEl.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:bold;">${quest.title} ${isClaimed ? '✅' : ''}</div>
+          <div class="small">${quest.description}</div>
+        </div>
+        ${isCompleted && !isClaimed ? `<button class="claim-quest-btn" onclick="claimQuestReward('${quest.id}')">Claim</button>` : ''}
+        ${isClaimed ? `<button class="claim-quest-btn" disabled>Claimed</button>` : ''}
+      </div>
+      <div style="margin-top:8px;">
+        <div class="quest-progress"><div class="quest-progress-bar" style="width:${progressPercentage}%"></div></div>
+        <div class="small" style="text-align:right; margin-top:4px;">${progress}/${quest.targetValue}</div>
+      </div>
+    `;
+    questsList.appendChild(questEl);
+  });
+}
+
+window.claimQuestReward = function(questId) {
+  const player = players[manuallySelectedPlayerIdx];
+  const quest = quests.find(q => q.id === questId);
+
+  if (quest && quest.completed && !quest.claimed) {
+    if (quest.reward.type === 'wax') {
+      player.cash += quest.reward.amount;
+      log(`${player.name} claimed ${quest.reward.amount} WAX from quest: "${quest.title}".`, 'good', player.id);
+    } else if (quest.reward.type === 'nft_pack') {
+      const nftPack = {
+        id: nfts.length,
+        name: `${quest.reward.pack} Pack #${nfts.length}`,
+        tier: 'Pack',
+        value: 0,
+        type: 'pack',
+        packType: quest.reward.pack
+      };
+      nfts.push(nftPack);
+      player.nfts.push(nftPack.id);
+      log(`${player.name} claimed a new NFT Pack from quest: "${quest.title}"!`, 'good', player.id);
+    }
+    quest.claimed = true;
+    renderQuests();
+    showPortfolio(manuallySelectedPlayerIdx);
+  } else {
+    log('Quest not completed or already claimed.', 'bad', player.id);
+  }
+}
+
+// --- CORE GAME LOOP ---
+function startSim() {
+  if (timer) return;
+  pools = loadCache() || FALLBACK.map(makePoolFromTokenInfo);
+  if (pools.length === 0) { log("No pools found, using fallback data. You can add more manually.", 'bad'); addPool(FALLBACK[0]); }
+  initPlayers();
+  initQuests();
+  updatePoolSelectors();
+  refreshChart();
+  showPortfolio(manuallySelectedPlayerIdx);
+  log('Simulation started.');
+  timer = setInterval(gameLoop, 1000);
+  
+  updateTradeAmtLabel('WAX');
+}
+function gameLoop() {
+  tick++;
+  marketSentiment = Math.random() * 0.2 - 0.1;
+  
+  if(tick % 10 === 0) {
+    applyRandomEvent();
+    runAlphaDropEffects();
+  }
+  
+  pools.forEach(p => updatePoolPrice(p));
+  
+  players.forEach(pl => {
+    if(pl.strategy !== 'manual') runBotStrategy(pl);
+    updatePlayerLp(pl);
+    updatePlayerRewards(pl);
+  });
+  
+  // NEW: Call the function to update button states for the manual player
+  const manualPlayer = players[manuallySelectedPlayerIdx];
+  if(manualPlayer) {
+    updateNonePackButtons(manualPlayer);
+  }
+  
+  if (portfolioViewMode === 'live') {
+    const activePlayers = Object.keys(lastActivity).filter(pIdx => tick - lastActivity[pIdx] <= 1);
+    if (activePlayers.length > 0) {
+      const randomActivePlayer = activePlayers[Math.floor(Math.random() * activePlayers.length)];
+      manuallySelectedPlayerIdx = parseInt(randomActivePlayer, 10);
+    }
+  }
+
+  refreshChart();
+  renderPools(filterInput.value);
+  showPortfolio(manuallySelectedPlayerIdx);
+  renderLeaderboard();
+  renderQuests();
+}
+
+function updateNonePackButtons(player) {
+  const noneHoldings = player.holdings.NONE || 0;
+  buyNonep100Btn.disabled = noneHoldings < 100;
+  buyNonep1000Btn.disabled = noneHoldings < 1000;
+  buyNonep10000Btn.disabled = noneHoldings < 10000;
+}
+
+function updatePoolPrice(pool) {
+  const volatility = Math.random() * 0.02 * (1 + pool.marketSentiment) * (activeAlphaDrop?.targetSymbol === pool.symbol && activeAlphaDrop.type === 'insider' ? 2.5 : 1);
+  pool.price *= 1 + (Math.random() - 0.5) * volatility + marketSentiment;
+  pool.price = Math.max(0.0001, pool.price);
+  pool.history.push(pool.price);
+}
+function runBotStrategy(player) {
+  if (player.strategy === 'conservative' && Math.random() < 0.1) {
+    const randomPool = pools[Math.floor(Math.random() * pools.length)];
+    if (randomPool.price < randomPool.history[randomPool.history.length-2]) {
+      const amount = player.cash * (Math.random() * 0.05 + 0.01);
+      buyToken(player, randomPool.symbol, amount);
+    }
+  } else if (player.strategy === 'dca_lp' && Math.random() < 0.05) {
+    const randomPool = pools[Math.floor(Math.random() * pools.length)];
+    const waxAmount = player.cash * 0.02;
+    addLiquidity(player, randomPool.symbol, waxAmount);
+  } else if (player.strategy === 'ape_in' && Math.random() < 0.05) {
+    const randomPool = pools[Math.floor(Math.random() * pools.length)];
+    const amount = player.cash * (Math.random() * 0.5 + 0.2);
+    if (Math.random() > 0.5) {
+      buyToken(player, randomPool.symbol, amount);
+    } else {
+      sellAll(player, randomPool.symbol);
+    }
+  } else if (player.strategy === 'fomo_fud' && Math.random() < 0.1) {
+    const volatilePool = pools.sort((a,b) => Math.abs(b.price - b.history[b.history.length-2]) - Math.abs(a.price - a.history[a.history.length-2]))[0];
+    if (volatilePool.price > volatilePool.history[volatilePool.history.length-2] * 1.05) {
+      buyToken(player, volatilePool.symbol, player.cash * 0.1);
+    } else if (volatilePool.price < volatilePool.history[volatilePool.history.length-2] * 0.95) {
+      sellAll(player, volatilePool.symbol);
+    }
+  } else if (player.strategy === 'sniper_bot' && Math.random() < 0.02) {
+    const targetPool = pools[Math.floor(Math.random() * pools.length)];
+    const waxAmount = player.cash * 0.1;
+    const isGoodTrade = Math.random() > 0.5;
+    if (isGoodTrade) {
+      targetPool.price *= 1.2;
+      buyToken(player, targetPool.symbol, waxAmount);
+      sellAll(player, targetPool.symbol);
+      targetPool.price /= 1.2;
+      log(`${player.name} executed a perfect sniper trade on ${targetPool.symbol}!`, 'good', player.id);
+    } else {
+      targetPool.price *= 0.8;
+      buyToken(player, targetPool.symbol, waxAmount);
+      sellAll(player, targetPool.symbol);
+      targetPool.price /= 0.8;
+      log(`${player.name} got sniped and took a loss on ${targetPool.symbol}.`, 'bad', player.id);
+    }
+  }
+}
+function updatePlayerLp(player) {
+  for(const sym in player.stakedLp) {
+    const pool = pools.find(p => p.symbol === sym);
+    if (!pool) continue;
+    const share = player.stakedLp[sym] / pool.totalLpSupply;
+    const reward = share * pool.emissionRate * 100;
+    
+    if (sym === 'LIPID') {
+        const oxoPool = pools.find(p => p.symbol === 'OXO');
+        if (oxoPool) {
+            player.pendingTokenRewards['OXO'] = (player.pendingTokenRewards['OXO'] || 0) + reward;
+        }
+    } else {
+        player.pendingTokenRewards[sym] = (player.pendingTokenRewards[sym] || 0) + reward;
+    }
+  }
+}
+// This function updates rewards from staked NFTs
+function updatePlayerRewards(player) {
+    // Check for each farm where the player has staked NFTs
+    for (const poolSymbol in player.stakedNftsByPool) {
+        const pool = pools.find(p => p.symbol === poolSymbol);
+        if (!pool) continue;
+
+        const stakedNfts = player.stakedNftsByPool[poolSymbol];
+        const totalYieldRate = stakedNfts.reduce((sum, nftId) => {
+            const nft = nfts[nftId];
+            return sum + (TIER_YIELD_RATES[nft.tier] || 0);
+        }, 0);
+
+        const reward = totalYieldRate * pool.price * 10; // Reward calculation
+        
+        // Add the reward to the player's pending token rewards for that specific pool
+        player.pendingTokenRewards[poolSymbol] = (player.pendingTokenRewards[poolSymbol] || 0) + reward;
+    }
+    // NEW: Update WAX rewards separately
+    const totalYieldRateForWax = player.stakedNfts.reduce((sum, nftId) => {
+        const nft = nfts[nftId];
+        // Only calculate WAX yield for non-token-yielding NFTs or all of them.
+        // For simplicity, let's say all staked NFTs generate a small amount of WAX.
+        return sum + (TIER_YIELD_RATES[nft.tier] || 0);
+    }, 0);
+    player.pendingWaxRewards += totalYieldRateForWax * 0.91; // Small WAX yield
+}
+
+function applyRandomEvent() {
+  const events = [
+    { type: 'pump', message: 'A large whale just bought a massive amount of #TOKEN!', effect: p => {
+      p.price *= 1.2;
+      log(`Massive buy order on ${p.symbol} has increased price by 20%!`, 'good');
+    }},
+    { type: 'dump', message: 'FUD spreads! A big holder just dumped a large bag of #TOKEN.', effect: p => {
+      p.price *= 0.8;
+      log(`Panic selling on ${p.symbol} has dropped the price by 20%!`, 'bad');
+    }},
+    { type: 'halving', message: 'The block rewards for #TOKEN have just been halved.', effect: p => {
+      p.emissionRate /= 2;
+      log(`Emission rate on ${p.symbol} has been halved. Staking rewards will decrease.`, 'bad');
+    }},
+    { type: 'boost', message: 'The team behind #TOKEN announced a new partnership!', effect: p => {
+      p.emissionRate *= 1.5;
+      p.marketSentiment += 0.5;
+      log(`New partnership announced for ${p.symbol}, boosting sentiment and LP rewards!`, 'good');
+    }},
+  ];
+  if(Math.random() < 0.1) {
+    const randomPool = pools[Math.floor(Math.random() * pools.length)];
+    const randomEvent = events[Math.floor(Math.random() * events.length)];
+    const message = randomEvent.message.replace('#TOKEN', randomPool.symbol);
+    randomEvent.effect(randomPool);
+    log(message, randomEvent.type === 'pump' || randomEvent.type === 'boost' ? 'good' : 'bad');
+  }
+}
+
+function triggerAlphaDrop() {
+  const types = ['insider', 'lp_incentive', 'market_pump'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const pool = pools[Math.floor(Math.random() * pools.length)];
+  let message = '';
+  switch(type) {
+    case 'insider':
+      activeAlphaDrop = { type, targetSymbol: pool.symbol, duration: 10 };
+      message = `Alpha Drop: Insider tip on ${pool.symbol}! Major price movement expected.`;
+      break;
+    case 'lp_incentive':
+      activeAlphaDrop = { type, targetSymbol: pool.symbol, duration: 10, originalRate: pool.emissionRate };
+      pool.emissionRate *= 3;
+      message = `Alpha Drop: LP Incentives on ${pool.symbol}! Yields boosted 3x.`;
+      break;
+    case 'market_pump':
+      const pumpers = players.filter(p => p.strategy !== 'manual');
+      if (pumpers.length > 0) {
+        const pumper = pumpers[Math.floor(Math.random() * pumpers.length)];
+        buyToken(pumper, pool.symbol, pumper.cash * 0.5);
+        message = `Alpha Drop: A market pump has been initiated on ${pool.symbol}!`;
+      }
+      break;
+  }
+  if (message) {
+    log(message, 'good');
+    showNotification(message);
+  }
+}
+
+function runAlphaDropEffects() {
+  if (!activeAlphaDrop) return;
+  activeAlphaDrop.duration--;
+  if (activeAlphaDrop.duration <= 0) {
+    if (activeAlphaDrop.type === 'lp_incentive') {
+      const pool = pools.find(p => p.symbol === activeAlphaDrop.targetSymbol);
+      if (pool) pool.emissionRate = activeAlphaDrop.originalRate;
+    }
+    log(`Alpha Drop on ${activeAlphaDrop.targetSymbol} has ended.`, 'info');
+    showNotification(`Alpha Drop on ${activeAlphaDrop.targetSymbol} has ended.`);
+    activeAlphaDrop = null;
+  }
+}
+
+// --- R&D FUNCTIONS ---
+function investInRd() {
+  const amount = parseFloat(rdInvestAmountEl.value);
+  if (isNaN(amount) || amount <= 0) {
+    log('Please enter a valid amount to invest.', 'bad');
+    return;
+  }
+  const manualPlayer = players.find(p => p.strategy === 'manual');
+  if (manualPlayer.cash < amount) {
+    log('Insufficient WAX to invest in R&D.', 'bad');
+    return;
+  }
+  manualPlayer.cash -= amount;
+  rdProgress += amount;
+  rdProgressEl.value = rdProgress;
+  log(`Invested ${amount} WAX in R&D. Progress: ${rdProgress}/${rdTotalCost}`, 'info', manualPlayer.id);
+  if (rdProgress >= rdTotalCost) {
+    log('R&D complete! Unlocking Alpha Drop...', 'good');
+    rdProgress = 0;
+    rdProgressEl.value = rdProgress;
+    triggerAlphaDrop();
+    const newNft = generateNft('protocol_drop');
+    manualPlayer.nfts.push(newNft.id);
+    log(`Received a new NFT: ${newNft.name} (${newNft.tier})`, 'good', manualPlayer.id);
+    showPortfolio(manuallySelectedPlayerIdx);
+  }
+}
+
+// --- TRADE FUNCTIONS ---
+function buyToken(player, symbol, waxAmount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if (player.cash < waxAmount) { log(`${player.name} tried to buy ${symbol} but has insufficient WAX.`, 'bad', player.id); return; }
+
+  const initialWax = pool.reserveWax;
+  const initialToken = pool.reserveToken;
+  const k = initialWax * initialToken;
+  const finalWax = initialWax + waxAmount;
+  const finalToken = k / finalWax;
+  const tokensReceived = initialToken - finalToken;
+  const priceImpact = ((initialWax / initialToken) - (finalWax / finalToken)) / (initialWax / initialToken) * 100;
+
+  pool.reserveWax = finalWax;
+  pool.reserveToken = finalToken;
+  pool.price = pool.reserveWax / pool.reserveToken;
+  player.cash -= waxAmount;
+  player.holdings[symbol] = (player.holdings[symbol] || 0) + tokensReceived;
+  log(`${player.name} bought ${tokensReceived.toFixed(3)} ${symbol} for ${waxAmount.toFixed(2)} WAX. Price impact: ${priceImpact.toFixed(2)}%`, 'info', player.id);
+}
+function sellToken(player, symbol, tokenAmount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if ((player.holdings[symbol] || 0) < tokenAmount) { log(`${player.name} tried to sell ${symbol} but has insufficient tokens.`, 'bad', player.id); return; }
+
+  const initialWax = pool.reserveWax;
+  const initialToken = pool.reserveToken;
+  const k = initialWax * initialToken;
+  const finalToken = initialToken - tokenAmount;
+  const finalWax = k / finalToken;
+  const waxReceived = finalWax - initialWax;
+  const priceImpact = ((finalWax / finalToken) - (initialWax / initialToken)) / (initialWax / initialToken) * 100;
+  
+  pool.reserveWax = finalWax;
+  pool.reserveToken = finalToken;
+  pool.price = pool.reserveWax / pool.reserveToken;
+  player.cash += waxReceived;
+  player.holdings[symbol] -= tokenAmount;
+  log(`${player.name} sold ${tokenAmount.toFixed(3)} ${symbol} for ${waxReceived.toFixed(2)} WAX. Price impact: ${priceImpact.toFixed(2)}%`, 'info', player.id);
+}
+function sellAll(player, symbol) {
+  const amount = player.holdings[symbol] || 0;
+  if(amount > 0) sellToken(player, symbol, amount);
+}
+function addLiquidity(player, symbol, waxAmount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if (player.cash < waxAmount) { log(`${player.name} has insufficient WAX to add liquidity.`, 'bad', player.id); return; }
+  const tokenAmount = waxAmount / pool.price;
+  if ((player.holdings[symbol] || 0) < tokenAmount) { log(`${player.name} has insufficient ${symbol} to add liquidity.`, 'bad', player.id); return; }
+  
+  const initialTotalSupply = pool.totalLpSupply;
+  const newLpTokens = (initialTotalSupply / pool.reserveWax) * waxAmount;
+  
+  pool.reserveWax += waxAmount;
+  pool.reserveToken += tokenAmount;
+  player.cash -= waxAmount;
+  player.holdings[symbol] -= tokenAmount;
+  pool.totalLpSupply += newLpTokens;
+  player.lpHoldings[symbol] = (player.lpHoldings[symbol] || 0) + newLpTokens;
+  log(`${player.name} added liquidity to ${symbol} pool, received ${newLpTokens.toFixed(3)} LP tokens.`, 'info', player.id);
+  
+  checkQuestProgress(player, 'addLiquidity', waxAmount);
+}
+function removeLiquidity(player, symbol, lpAmount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if ((player.lpHoldings[symbol] || 0) < lpAmount) { log(`${player.name} has insufficient LP tokens.`, 'bad', player.id); return; }
+  
+  const share = lpAmount / pool.totalLpSupply;
+  const waxReceived = pool.reserveWax * share;
+  const tokenReceived = pool.reserveToken * share;
+  
+  pool.reserveWax -= waxReceived;
+  pool.reserveToken -= tokenReceived;
+  player.cash += waxReceived;
+  player.holdings[symbol] = (player.holdings[symbol] || 0) + tokenReceived;
+  player.lpHoldings[symbol] -= lpAmount;
+  pool.totalLpSupply -= lpAmount;
+  log(`${player.name} removed liquidity from ${symbol} pool, received ${waxReceived.toFixed(2)} WAX and ${tokenReceived.toFixed(3)} ${symbol}.`, 'info', player.id);
+}
+function stakeLp(player, symbol, amount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if ((player.lpHoldings[symbol] || 0) < amount) { log(`${player.name} has insufficient LP tokens.`, 'bad', player.id); return; }
+  
+  player.lpHoldings[symbol] -= amount;
+  player.stakedLp[symbol] = (player.stakedLp[symbol] || 0) + amount;
+  pool.stakedLpTotal += amount;
+  log(`${player.name} staked ${amount.toFixed(3)} LP tokens for ${symbol}.`, 'info', player.id);
+}
+window.stakeLpAll = function(playerIdx, symbol) {
+  const pl = players[playerIdx];
+  const amount = pl.lpHoldings[symbol] || 0;
+  if(amount > 0) stakeLp(pl, symbol, amount);
+  showPortfolio(playerIdx);
+}
+function unstakeLp(player, symbol, amount) {
+  const pool = pools.find(p => p.symbol === symbol);
+  if (!pool) { log(`Error: Pool for ${symbol} not found.`, 'bad'); return; }
+  if ((player.stakedLp[symbol] || 0) < amount) { log(`${player.name} has insufficient staked LP tokens.`, 'bad', player.id); return; }
+
+  player.stakedLp[symbol] -= amount;
+  player.lpHoldings[symbol] = (player.lpHoldings[symbol] || 0) + amount;
+  pool.stakedLpTotal -= amount;
+  log(`${player.name} unstaked ${amount.toFixed(3)} LP tokens for ${symbol}.`, 'info', player.id);
+}
+window.unstakeLpAll = function(playerIdx, symbol) {
+  const pl = players[playerIdx];
+  const amount = pl.stakedLp[symbol] || 0;
+  if(amount > 0) unstakeLp(pl, symbol, amount);
+  showPortfolio(playerIdx);
+}
+
+// --- NEW FUNCTIONS FOR DYNAMIC UI ---
+function updateTradeAmtLabel(text) {
+  tradeAmtLabel.textContent = `Trade Amount (${text})`;
+}
+
+let lastAction = 'buy';
+
+function updateLastAction(action) {
+    lastAction = action;
+    if (action === 'buy') {
+        updateTradeAmtLabel('WAX');
+    } else if (action === 'sell') {
+        const pool = pools[selectedPoolIdx];
+        if (pool) {
+            updateTradeAmtLabel(pool.symbol);
+        }
+    }
+}
+window.setTradeAmt = (p) => {
+    const player = players[manuallySelectedPlayerIdx];
+    const pool = pools[selectedPoolIdx];
+    let amount = 0;
+    
+    if (lastAction === 'buy') {
+        amount = player.cash * p;
+    } else if (lastAction === 'sell') {
+        amount = (player.holdings[pool.symbol] || 0) * p;
+    } else if (lastAction === 'addLp' || lastAction === 'removeLp') {
+        amount = player.cash * p;
+    }
+    
+    tradeAmt.value = amount.toFixed(3);
+};
+
+// --- Event Listeners and Init ---
+document.addEventListener('DOMContentLoaded', () => {
+  startSim();
+  
+  filterInput.addEventListener('input', (e) => renderPools(e.target.value));
+  rdInvestBtn.onclick = () => { investInRd(); };
+  checkBtn.onclick = () => { checkToken(symbolInput.value, contractInput.value); };
+  loadPoolBtn.onclick = async () => {
+    const newPools = await loadPoolsForContract(contractInput.value);
+    newPools.forEach(p => addPool(p));
+  };
+  addManualBtn.onclick = () => {
+    const symbol = symbolInput.value;
+    const contract = contractInput.value;
+    const price = parseFloat(manualPrice.value) || 0;
+    if(symbol && contract && price) {
+      addPool(makePoolFromTokenInfo({symbol, contract, price}));
+      log(`Manually added pool for ${symbol} at ${price} WAX`, 'good');
+    } else {
+      log('Please fill in all fields to add a token manually', 'bad');
+    }
+  };
+  useFallbackBtn.onclick = () => {
+    pools = FALLBACK.map(makePoolFromTokenInfo);
+    saveCache();
+    startSim();
+    log('Fallback tokens loaded.', 'info');
+  };
+  resetBtn.onclick = () => {
+    localStorage.removeItem(CACHE_KEY);
+    location.reload();
+  };
+  selectPool.onchange = (e) => selectPoolIdx(parseInt(e.target.value, 10));
+  
+  buyBtn.onclick = () => {
+    updateLastAction('buy');
+    const p = players[manuallySelectedPlayerIdx];
+    const pool = pools[selectedPoolIdx];
+    const amount = parseFloat(tradeAmt.value) || 0;
+    if (amount > 0) buyToken(p, pool.symbol, amount);
+  };
+  sellBtn.onclick = () => {
+    updateLastAction('sell');
+    const p = players[manuallySelectedPlayerIdx];
+    const pool = pools[selectedPoolIdx];
+    const amount = parseFloat(tradeAmt.value) || 0;
+    if (amount > 0) {
+      sellToken(p, pool.symbol, amount);
+    }
+  };
+  addLpBtn.onclick = () => {
+    updateLastAction('addLp');
+    const p = players[manuallySelectedPlayerIdx];
+    const pool = pools[selectedPoolIdx];
+    const amount = parseFloat(tradeAmt.value) || 0;
+    if (amount > 0) addLiquidity(p, pool.symbol, amount);
+  };
+  removeLpBtn.onclick = () => {
+    updateLastAction('removeLp');
+    const p = players[manuallySelectedPlayerIdx];
+    const pool = pools[selectedPoolIdx];
+    const amount = parseFloat(tradeAmt.value) || 0;
+    if (amount > 0) {
+      removeLiquidity(p, pool.symbol, amount);
+    }
+  };
+  
+  pauseBtn.onclick = () => {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+      pauseBtn.textContent = 'Resume Sim';
+      log('Simulation paused.');
+    } else {
+      timer = setInterval(gameLoop, 1000);
+      pauseBtn.textContent = 'Pause Sim';
+      log('Simulation resumed.');
+    }
+  };
+
+  buyBasicPackBtn.onclick = () => buyNftPack(manuallySelectedPlayerIdx, 'basic');
+  buyPremiumPackBtn.onclick = () => buyNftPack(manuallySelectedPlayerIdx, 'premium');
+  buyElitePackBtn.onclick = () => buyNftPack(manuallySelectedPlayerIdx, 'elite');
+  
+  buyNonep100Btn.onclick = () => buyNonePack(manuallySelectedPlayerIdx, 100);
+  buyNonep1000Btn.onclick = () => buyNonePack(manuallySelectedPlayerIdx, 1000);
+  buyNonep10000Btn.onclick = () => buyNonePack(manuallySelectedPlayerIdx, 10000);
+  
+  // NEW: Event listener for the new pack type
+  buyLeftoversPackBtn.onclick = () => buyNftPack(manuallySelectedPlayerIdx, 'leftovers');
+
+  const accordions = document.querySelectorAll('.accordion-header');
+  accordions.forEach(header => {
+    header.addEventListener('click', () => {
+      const contentWrapper = header.nextElementSibling;
+      header.classList.toggle('active');
+      contentWrapper.classList.toggle('active');
+    });
+  });
+
+  lockViewBtn.onclick = () => {
+    portfolioViewMode = 'locked';
+    lockViewBtn.classList.add('active');
+    liveViewBtn.classList.remove('active');
+    log('Portfolio view locked to manual player.', 'info');
+  };
+
+  liveViewBtn.onclick = () => {
+    portfolioViewMode = 'live';
+    liveViewBtn.classList.add('active');
+    lockViewBtn.classList.remove('active');
+    log('Portfolio view switched to live events.', 'info');
+  };
+});
+// =========================================================================
+// NEW: REAL-TIME TOKEN HUB LOGIC & DATA EXPORT
+// =========================================================================
+
+// Global Variables to store fetched data
+let realTimeTokenData = {};
+
+// Helper function to format numbers
+function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
+    return num.toFixed(4);
+}
+
+// Function to fetch real token data from Alcor API
+async function fetchRealTokenData(baseSymbol, baseContract, quoteSymbol, quoteContract) {
+    // Construct the unique market ID for the Alcor API
+    // Example: TLM-alien.worlds_WAX-eosio.token
+    const marketId = `${baseSymbol}-${baseContract}_${quoteSymbol}-${quoteContract}`;
+    const apiUrl = `https://alcor.exchange/api/v2/markets/${marketId}`;
+
+    try {
+        log(`Fetching real-time data for ${baseSymbol}/${quoteSymbol}...`, 'info');
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // This endpoint gives us all the data we need (price, volume, reserves)
+        const tickerData = data.ticker || {};
+        const poolData = data.pool || {};
+        const baseTokenData = data.base_token || {};
+
+        if (!tickerData.last_price) {
+             log(`No ticker data found for market ID: ${marketId}.`, 'bad');
+             return;
+        }
+
+        const lastPrice = parseFloat(tickerData.last_price);
+        const change24h = parseFloat(tickerData.change24);
+        const volume24h = parseFloat(tickerData.volume24) * lastPrice; // Volume in WAX/Quote token
+        const reserveWax = parseFloat(poolData.base_reserve) || 0;
+        const totalSupply = parseFloat(baseTokenData.supply) || 'N/A';
+
+        // Store data for export
+        realTimeTokenData = {
+            marketId,
+            lastPrice: lastPrice.toFixed(8),
+            change24h: change24h.toFixed(2) + '%',
+            volume24h: volume24h.toFixed(2) + ' WAX',
+            poolReserveWax: reserveWax.toFixed(2) + ' WAX',
+            totalSupply: totalSupply,
+            source: 'Alcor Exchange API v2'
+        };
+
+        // Update UI
+        document.getElementById('tokenSymbolDisplay').textContent = `${baseSymbol}/WAX`;
+        document.getElementById('livePrice').textContent = `${lastPrice.toFixed(8)} WAX`;
+        document.getElementById('liveVolume').textContent = formatNumber(volume24h) + ' WAX';
+        document.getElementById('poolReserve').textContent = formatNumber(reserveWax) + ' WAX';
+        document.getElementById('totalSupply').textContent = totalSupply !== 'N/A' ? formatNumber(totalSupply) : 'N/A';
+
+        const liveChangeEl = document.getElementById('liveChange');
+        liveChangeEl.textContent = `${change24h.toFixed(2)}%`;
+        liveChangeEl.style.color = change24h >= 0 ? '#4caf50' : '#ef5350'; // Green for good, Red for bad
+
+        log(`Successfully updated live data for ${baseSymbol}/${quoteSymbol}.`, 'good');
+
+    } catch (e) {
+        log(`Error fetching live data: ${e.message}. Using default placeholder data.`, 'bad');
+    }
+}
+
+// Function to export data
+function exportDataToJSON() {
+    const allData = {
+        // You can combine the real-time data with your current simulation data if needed
+        realTimeMetrics: realTimeTokenData,
+        // Example for feeding external app metadata:
+        assetMetadata: {
+            name: document.getElementById('tokenSymbolDisplay').textContent.split('/')[0],
+            contract: document.getElementById('contractInput').value,
+            price: realTimeTokenData.lastPrice,
+            liquidity: realTimeTokenData.poolReserveWax,
+            // Add more fields needed for your bubble app
+        }
+    };
+    
+    // Create a Blob from the JSON data
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `${realTimeTokenData.marketId || 'token'}_hub_data.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    
+    log(`Exported token hub data to JSON.`, 'info');
+}
+
+// Function to simulate adding token to a wallet (e.g., MetaMask/WAX Wallet)
+function addToWalletPlaceholder() {
+    if (!realTimeTokenData.marketId) {
+        log("Cannot add to wallet: No token data loaded. Use 'Check token' first.", 'bad');
+        return;
+    }
+    
+    // In a real dApp, this would trigger a `wallet_watchAsset` RPC call.
+    // Since we're in a browser simulation, we just log the required token info.
+    const symbol = document.getElementById('symbolInput').value.toUpperCase();
+    const contract = document.getElementById('contractInput').value;
+    
+    log(`Simulating adding token to wallet. You would need the following details:`, 'good');
+    log(`Token Symbol: ${symbol}`, 'good');
+    log(`Token Contract: ${contract}`, 'good');
+    log(`Decimals: (Check with token contract data)`, 'good');
+    
+    // Show a notification banner
+    showNotification(`Added ${symbol} to Wallet! (Placeholder - check console/log for details)`);
+}
+
+// Event Listeners for new buttons
+document.getElementById('exportDataBtn').onclick = exportDataToJSON;
+document.getElementById('metamaskBtn').onclick = addToWalletPlaceholder;
+
+// Initial data load on startup.
+// We'll use a popular WAX token as a default example: TLM on the alien.worlds contract
+// This will make your Token Hub display real data right away.
+document.addEventListener('DOMContentLoaded', () => {
+    // You can call this based on the existing inputs too:
+    // fetchRealTokenData(document.getElementById('symbolInput').value, document.getElementById('contractInput').value, 'WAX', 'eosio.token');
+    fetchRealTokenData('NONE', 'bobocoin.gm', 'WAX', 'eosio.token');
+});
+
+// We also need to modify the original 'Check token' button functionality
+const originalCheckBtn = document.getElementById('checkBtn');
+if(originalCheckBtn) {
+    originalCheckBtn.onclick = async () => {
+        const symbol = document.getElementById('symbolInput').value.toUpperCase();
+        const contract = document.getElementById('contractInput').value;
+        
+        if (symbol && contract) {
+            // First, call the function to fetch real-time data
+            await fetchRealTokenData(symbol, contract, 'WAX', 'eosio.token');
+            
+            // The original logic of 'Check token' can follow here if needed
+            log(`Checked token details for ${symbol} on ${contract}.`, 'info');
+        } else {
+             log('Please enter both Symbol and Contract to check the token.', 'bad');
+        }
+    };
+}
+// =========================================================================
+// END OF NEW CODE
+// =========================================================================
+
+</script>
+</body>
+</html>
